@@ -5,22 +5,30 @@ package echang.pxd.poker;
  * @Author 彭孝东
  * @QQ 932056657
  */
-public class PokerGameCenter {
-    // 保存单例对象
-    private static PokerGameCenter instance;
+public class PokerGameCenter extends BaseGameCenter{
+    public PokerGameCenter(){}
+    @Override
+    protected void initGame() {
+        System.out.println("hello world");
+    }
 
-    // 私有化默认的构造方法
-    private PokerGameCenter(){}
+    @Override
+    protected void initPokers() {
 
-    // 获取单例对象
-    public static PokerGameCenter getInstance(){
-        if (instance == null){
-            synchronized (PokerGameCenter.class){
-                if (instance == null){
-                    instance = new PokerGameCenter();
-                }
-            }
-        }
-        return instance;
+    }
+
+    @Override
+    protected void initPlayers() {
+
+    }
+
+    @Override
+    public void onInitSuccess(IGame obj) {
+
+    }
+
+    @Override
+    public void onInitFailure(String errMsg) {
+
     }
 }
