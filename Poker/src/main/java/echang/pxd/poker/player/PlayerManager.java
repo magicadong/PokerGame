@@ -81,12 +81,51 @@ public class PlayerManager {
         return players.get(index);
     }
 
-    public void awardPlayer(int money){
+    /**
+     * A 50
+     * B 20
+     * C 20
+     * @param money
+     */
+    public void awardPlayer(int money,int smallestAllinBet){
+        Player max = null;
         for (Player player: players){
             if (player.playerState == Constants.IPlayerState.HAND){
-                player.winMoney(money);
+                if (max == null){
+                    //找到第一个没有弃牌的人
+                    max = player;
+                }else{
+                    int result = max.poker.compareTo(player.poker);
+                    if (result == -1){
+                        //max对应的牌比player的牌要小
+                        //max记录最大的哪个玩家
+                        max = player;
+                    }
+                }
             }
         }
+        //最大的人赢钱
+        max.winMoney(money);
+
+        //A 500 -100 = 400
+        //B 200 -100 = 100
+        //C 100
+        //100*3 = 300
+        //800 - 500 = 300;
+        if (smallestAllinBet == 0){
+            return;
+        }
+        //将max之外的所有all-in的人多于的钱返还
+        int totalReturn = 0;
+        for (Player player: players){
+            //找到没有弃牌 并且 不是当前最大的那个人
+            if (!player.equals(max) && player.playerState==Constants.IPlayerState.HAND){
+                player.returnMoney(player.currentBet-smallestAllinBet);
+                totalReturn += (player.currentBet-smallestAllinBet);
+            }
+        }
+        //从max中退回多余的钱
+        max.lostMoney(totalReturn);
     }
 
     public void setListener(IGameInitListener listener) {

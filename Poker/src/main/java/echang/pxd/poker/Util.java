@@ -33,10 +33,12 @@ public class Util {
     public static void show(boolean nextLine,boolean needNumber,String... args){
         StringBuilder builder = new StringBuilder();
         if (needNumber){
+            System.out.println("----------------------------------");
             for (int i = 0; i < args.length; i++){
                 String content = (i+1)+"."+args[i]+" ";
                 builder.append(content);
             }
+            builder.append("\n----------------------------------");
         }else{
             for (String content: args){
                 builder.append(content+" ");
@@ -58,4 +60,15 @@ public class Util {
         show(false,false,new String[]{content});
     }
 
+    /**
+     * 从Array数组中寻找某个对象的索引值
+     */
+    public static int indexOfObject(String object, String ...array){
+        for (int i = 0; i < array.length; i++){
+            if (array[i].equals(object)){
+                return i;
+            }
+        }
+        return -1;
+    }
 }

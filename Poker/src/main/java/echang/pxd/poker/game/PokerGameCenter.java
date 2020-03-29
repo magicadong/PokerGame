@@ -19,6 +19,9 @@ public class PokerGameCenter extends AGameCenter {
     private int liveCount;
     private int currentPlayerIndex;
     private int lastPlayerBet;
+    private boolean isAllIn = false;
+    private int allInPosition;
+    private int smallestAllinBet;
 
     private PokerGameCenter() {
     }
@@ -81,43 +84,131 @@ public class PokerGameCenter extends AGameCenter {
      */
     private void startBets() {
         while (liveCount > 1) {
-            //显示操作列表
-            Util.show(true, true, new String[]{"下注", "跟注", "all-in", "比牌", "弃牌"});
-            //获取当前玩家信息
+            if (currentPlayerIndex == allInPosition) {
+                //直接比大小
+                break;
+            }
             Player player = playerManager.getPlayer(currentPlayerIndex - 1);
-            Util.show("请" + player.id + "号玩家选择操作(" + player.name + " $" + player.chip + "):");
-            //接收用户的输入
-            int choice = input(5, 1);
-            switch (choice) {
-                case 1:
-                    //下注
-                    bet(player);
-                    break;
-                case 2:
-                    break;
-                case 3:
-                    break;
-                case 4:
 
-                    break;
-                case 5:
-                    //弃牌
-                    player.playerState = Constants.IPlayerState.DISCARD;
-                    //在玩的玩家数-1
-                    liveCount--;
-                    break;
+            //判断当前这个人是否已经弃牌
+            if (player.playerState == Constants.IPlayerState.DISCARD){
+                //这个人已经弃牌，下面不需要做
+                changeCurrentIndex();
+                continue;
+            }
+            //判断当前这个人的提示信息
+            if (player.chip <= lastPlayerBet || isAllIn){
+                //"all-in","弃牌"
+                //显示操作列表
+                Util.show(true, true, Constants.IBet.LESS);
+                //获取当前玩家信息
+                Util.show("请" + player.id + "号玩家选择操作(" + player.name + " $" + player.chip + "):");
+                //接收用户的输入
+                int choice = input(2, 1);
+                switch (choice) {
+                    case 1:
+                        //all-in
+                        allIn(player);
+                        break;
+                    case 2:
+                        //弃牌
+                        giveup(player);
+                        break;
+                }
+            }else{
+                //"下注", "跟注", "all-in", "比牌", "弃牌"
+                Util.show(true, true, Constants.IBet.NORMAL);
+                //获取当前玩家信息
+                Util.show("请" + player.id + "号玩家选择操作(" + player.name + " $" + player.chip + "):");
+                //接收用户的输入
+                int choice = input(5, 1);
+                switch (choice) {
+                    case 1:
+                        //下注
+                        bet(player);
+                        break;
+                    case 2:
+                        //跟注
+                        follow(player);
+                        break;
+                    case 3:
+                        //all-in
+                        allIn(player);
+                        break;
+                    case 4:
+
+                        break;
+                    case 5:
+                        //弃牌
+                        giveup(player);
+                        break;
+                }
             }
             //当前玩家索引指向下一个
-            currentPlayerIndex++;
-            if (currentPlayerIndex > totalPlayer) {
-                currentPlayerIndex = 1;
-            }
+            changeCurrentIndex();
+
         }
         //游戏结束
-        playerManager.awardPlayer(ante);
+        playerManager.awardPlayer(ante,smallestAllinBet);
         System.out.println(playerManager.players);
     }
 
+    private void changeCurrentIndex(){
+        //当前玩家索引指向下一个
+        currentPlayerIndex++;
+        if (currentPlayerIndex > totalPlayer) {
+            currentPlayerIndex = 1;
+        }
+    }
+
+    /**
+     * all-in
+     * 当一个人选择all-in 之比较一次，最大的赢 就结束了
+     * A 40 - 40all-in
+     * B 20 - 50all-in
+     * C 400 - 400
+     */
+    private void allIn(Player player){
+        if (isAllIn){
+            //比较我们两个all-in的值
+            if (player.chip < smallestAllinBet){
+                smallestAllinBet = player.chip;
+            }
+        }else{
+            //第一次all-in
+            isAllIn = true;
+            //记录当前all-in最小值
+            smallestAllinBet = player.chip;
+            //记录当前all-in起始点
+            allInPosition = currentPlayerIndex;
+        }
+
+        //当前这个人all-in
+        player.currentBet = player.chip;
+        //总金额
+        ante += player.chip;
+        //下注所有
+        player.lostMoney(player.chip);
+    }
+    /**
+     * 跟注
+     */
+    private void follow(Player player){
+        //总金额增加
+        ante += lastPlayerBet;
+        //扣除这个人的筹谋
+        player.lostMoney(lastPlayerBet);
+    }
+
+    /**
+     * 弃牌
+     */
+    private void giveup(Player player){
+        //弃牌
+        player.playerState = Constants.IPlayerState.DISCARD;
+        //在玩的玩家数-1
+        liveCount--;
+    }
 
     /**
      * 下注

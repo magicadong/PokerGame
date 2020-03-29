@@ -11,9 +11,8 @@ import echang.pxd.poker.poker.Poker;
 public interface Constants {
 
     interface IBet{
-        String[] NORMAL_BET = new String[]{"下注", "跟注", "all-in", "比牌", "弃牌"};
-        String[] FIRST_BET = new String[]{"下注", "all-in", "比牌", "弃牌"};
-        String[] LOWER_BET = new String[]{"all-in","弃牌"};
+        String[] NORMAL = new String[]{"下注", "跟注", "all-in", "比牌", "弃牌"};
+        String[] LESS = new String[]{"all-in","弃牌"};
     }
 
     interface IPlayer{

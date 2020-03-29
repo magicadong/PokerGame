@@ -17,6 +17,7 @@ public class Player {
     public Poker poker; //牌
     public ArrayList<Poker> pokers; //多张牌
     public int playerState;//玩家的状态
+    public int currentBet; //当前下注金额
 
     public Player(int id, String name, int chip) {
         this.id = id;
@@ -40,6 +41,14 @@ public class Player {
      * @param count
      */
     public void winMoney(int count){
+        chip += count;
+    }
+
+    /**
+     * 退钱
+     * @return
+     */
+    public void returnMoney(int count){
         chip += count;
     }
 
